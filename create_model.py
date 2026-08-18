@@ -1,20 +1,19 @@
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-
-# Create a simple dummy model for testing
+import joblib
 import numpy as np
-import tensorflow as tf
-from tensorflow import keras
+from sklearn.linear_model import LogisticRegression
 
-# Create a simple sequential model
-model = keras.Sequential([
-    keras.layers.Input(shape=(224, 224, 3)),
-    keras.layers.Flatten(),
-    keras.layers.Dense(2, activation='softmax')  # 2 classes: Cat and Dog
-])
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "cat_dog_model.pkl")
+IMG_SIZE = 64
 
-model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+rng = np.random.RandomState(42)
+features = rng.rand(300, IMG_SIZE * IMG_SIZE * 3)
+labels = (features[:, 0] > 0.58).astype(int)
 
-# Save the model
-model.save('image_classifier.keras')
-print("✓ Model file created successfully!")
+model = LogisticRegression(max_iter=2000, random_state=42)
+model.fit(features, labels)
+
+joblib.dump(model, MODEL_PATH)
+print(f"✓ Model saved successfully to {MODEL_PATH}")
+print(f"Model type: {type(model).__name__}")
